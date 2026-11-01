@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Local Clustering Explorer</title>
+  <meta name="description" content="Generate networks and compute the local clustering coefficient step by step. Companion to the Social Network Analysis course, Paris School of Business.">
+  <meta name="theme-color" content="#0B0B14">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/katex/katex.min.css">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <header class="top">
+    <div>
+      <p class="kicker" data-t="kicker"></p>
+      <h1 data-t="title"></h1>
+      <p class="tagline" data-t="tagline"></p>
+    </div>
+    <div class="lang" role="group" aria-label="Language">
+      <button type="button" data-lang="en">EN</button>
+      <button type="button" data-lang="fr">FR</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="generator" aria-labelledby="gen-title">
+      <h2 id="gen-title" class="sr" data-t="genTitle"></h2>
+      <label class="field">
+        <span data-t="genModel"></span>
+        <select id="model"></select>
+      </label>
+      <div id="params" class="params"></div>
+      <label class="field seed">
+        <span data-t="genSeed"></span>
+        <input id="seed" type="number" min="0" step="1" inputmode="numeric">
+      </label>
+      <button id="regen" type="button" class="primary" data-t="genNew"></button>
+    </section>
+
+    <div class="lab">
+      <section class="stage" aria-labelledby="stage-title">
+        <div class="stage-bar">
+          <h2 id="stage-title" class="sr" data-t="stageTitle"></h2>
+          <div class="tabs" role="tablist">
+            <button type="button" role="tab" data-mode="walk" data-t="modeWalk"></button>
+            <button type="button" role="tab" data-mode="edit" data-t="modeEdit"></button>
+            <button type="button" role="tab" data-mode="quiz" data-t="modeQuiz"></button>
+          </div>
+          <label class="check">
+            <input id="heat" type="checkbox">
+            <span data-t="heatToggle"></span>
+          </label>
+        </div>
+        <svg id="graph" viewBox="0 0 800 600" role="img" aria-labelledby="stage-title"></svg>
+        <div id="legend" class="legend" hidden>
+          <span data-t="legendLow"></span>
+          <i class="ramp"></i>
+          <span data-t="legendHigh"></span>
+          <i class="swatch-undef"></i>
+          <span data-t="legendUndef"></span>
+        </div>
+        <p id="stageHint" class="hint"></p>
+      </section>
+
+      <aside class="panel" aria-live="polite">
+        <div id="walkPanel">
+          <p class="kicker" id="stepKicker"></p>
+          <h2 id="stepTitle"></h2>
+          <div id="stepBody" class="body"></div>
+          <div id="formula" class="formula"></div>
+          <div id="chips" class="chips"></div>
+          <div id="gauge" class="gauge" hidden>
+            <div class="track"><div class="fill"></div></div>
+            <div class="scale"><span>0</span><span>0.5</span><span>1</span></div>
+          </div>
+          <div class="controls">
+            <button id="prev" type="button" data-t="ctlPrev"></button>
+            <button id="play" type="button" class="primary"></button>
+            <button id="next" type="button" data-t="ctlNext"></button>
+            <button id="skip" type="button" data-t="ctlSkip"></button>
+            <label class="speed">
+              <span data-t="ctlSpeed"></span>
+              <select id="speed">
+                <option value="2400">0.5×</option>
+                <option value="1200" selected>1×</option>
+                <option value="600">2×</option>
+              </select>
+            </label>
+          </div>
+          <p class="progress"><span id="progressBar"></span></p>
+        </div>
+
+        <div id="quizPanel" hidden>
+          <p class="kicker" data-t="quizKicker"></p>
+          <h2 id="quizTitle"></h2>
+          <div class="body" id="quizBody"></div>
+          <form id="quizForm" autocomplete="off">
+            <label class="answer"><span id="qk"></span><input id="ansK" inputmode="numeric"><i id="markK"></i></label>
+            <label class="answer"><span id="qL"></span><input id="ansL" inputmode="numeric"><i id="markL"></i></label>
+            <label class="answer"><span id="qC"></span><input id="ansC" inputmode="decimal"><i id="markC"></i></label>
+            <div class="controls">
+              <button type="submit" class="primary" data-t="quizCheck"></button>
+              <button type="button" id="quizShow" data-t="quizShow"></button>
+              <button type="button" id="quizNew" data-t="quizNew"></button>
+            </div>
+          </form>
+          <p id="quizFeedback" class="feedback"></p>
+          <p class="score" id="quizScore"></p>
+        </div>
+      </aside>
+    </div>
+
+    <section class="stats" aria-labelledby="net-title">
+      <h2 id="net-title" data-t="netTitle"></h2>
+      <div id="tiles" class="tiles"></div>
+      <p id="netNote" class="note"></p>
+    </section>
+
+    <div id="analysis" class="analysis">
+      <section class="table-card" aria-labelledby="tbl-title">
+        <h2 id="tbl-title" data-t="tableTitle"></h2>
+        <div class="table-wrap">
+          <table id="table"></table>
+        </div>
+      </section>
+      <section class="plot-card" aria-labelledby="plot-title">
+        <h2 id="plot-title" data-t="plotTitle"></h2>
+        <p class="note" data-t="plotNote"></p>
+        <svg id="plot" viewBox="0 0 560 400" role="img" aria-labelledby="plot-title"></svg>
+        <p id="plotUndef" class="note"></p>
+      </section>
+    </div>
+
+    <section class="watch" aria-labelledby="vid-title">
+      <div>
+        <h2 id="vid-title" data-t="videoTitle"></h2>
+        <p class="note" data-t="videoNote"></p>
+      </div>
+      <video id="video" controls preload="none" playsinline poster="assets/video/poster.jpg"></video>
+    </section>
+
+    <section class="sheet" aria-labelledby="sheet-title">
+      <h2 id="sheet-title" data-t="sheetTitle"></h2>
+      <div class="sheet-grid">
+        <article>
+          <h3 data-t="sheetDef"></h3>
+          <div id="sheetFormula" class="formula"></div>
+          <p id="sheetDefBody" class="body"></p>
+        </article>
+        <article>
+          <h3 data-t="sheetTraps"></h3>
+          <ul id="sheetTraps"></ul>
+        </article>
+        <article>
+          <h3 data-t="sheetCode"></h3>
+<pre><code>import networkx as nx
+
+G = nx.karate_club_graph()
+nx.clustering(G, 0)        # one node
+nx.clustering(G)           # all nodes
+nx.average_clustering(G)   # mean</code></pre>
+          <p id="sheetCodeNote" class="note"></p>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p data-t="footer"></p>
+  </footer>
+
+  <div id="tooltip" class="tooltip" hidden></div>
+
+  <script src="assets/katex/katex.min.js"></script>
+  <script type="module" src="assets/app.js"></script>
+</body>
+</html>
